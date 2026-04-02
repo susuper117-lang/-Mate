@@ -41,9 +41,20 @@ interface Reservation {
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+
+  const navItems = [
+    { label: '양도신청', href: '#reservation-form', subItems: ['양도신청'] },
+    { label: '신청조회', href: '#', subItems: ['양도신청 조회'] },
+    { label: '검진기관', href: '#', subItems: ['검진기관 안내'] },
+    { label: '고객센터', href: '#', subItems: ['검진 절차안내', 'FAQ'] },
+  ];
 
   return (
-    <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
+    <nav 
+      className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100"
+      onMouseLeave={() => setHoveredItem(null)}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-20 items-center">
           <div className="flex items-center gap-2">
@@ -80,11 +91,21 @@ const Navbar = () => {
             </div>
           </div>
           
-          <div className="hidden md:flex items-center gap-12 mr-auto ml-16">
-            <a href="#" className="text-slate-600 hover:text-brand-primary font-medium transition-colors">양도신청</a>
-            <a href="#" className="text-slate-600 hover:text-brand-primary font-medium transition-colors">신청조회</a>
-            <a href="#" className="text-slate-600 hover:text-brand-primary font-medium transition-colors">검진기관</a>
-            <a href="#" className="text-slate-600 hover:text-brand-primary font-medium transition-colors">고객센터</a>
+          <div className="hidden md:flex items-center gap-12 mr-auto ml-16 h-full">
+            {navItems.map((item) => (
+              <div 
+                key={item.label}
+                className="h-full flex items-center justify-center min-w-[80px]"
+                onMouseEnter={() => setHoveredItem(item.label)}
+              >
+                <a 
+                  href={item.href} 
+                  className={`text-slate-600 hover:text-brand-primary font-medium transition-colors h-full flex items-center border-b-2 ${hoveredItem === item.label ? 'border-brand-primary text-brand-primary' : 'border-transparent'}`}
+                >
+                  {item.label}
+                </a>
+              </div>
+            ))}
           </div>
 
           <div className="hidden md:flex items-center gap-4 text-xs text-slate-500 border-l border-slate-200 ml-8 pl-8">
@@ -111,6 +132,50 @@ const Navbar = () => {
         </div>
       </div>
 
+      {/* Mega Menu Dropdown */}
+      <AnimatePresence>
+        {hoveredItem && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className="absolute top-full left-0 w-full bg-slate-900/80 backdrop-blur-xl text-white z-40 overflow-hidden shadow-2xl border-b border-white/10"
+            onMouseEnter={() => setHoveredItem(hoveredItem)}
+          >
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex">
+                {/* Offset to align with Navbar items (Logo area width + ml-16) */}
+                <div className="w-[188px] shrink-0" /> 
+                
+                <div className="flex gap-12 py-10 ml-16">
+                  {navItems.map((item) => (
+                    <div 
+                      key={item.label} 
+                      className={`flex flex-col items-center transition-opacity duration-300 min-w-[80px] ${hoveredItem === item.label ? 'opacity-100' : 'opacity-40'}`}
+                    >
+                      <div className="flex flex-col items-center gap-4">
+                        {item.subItems.map((sub) => (
+                          <a 
+                            key={sub} 
+                            href={item.href} 
+                            className="text-slate-300 hover:text-brand-primary transition-colors text-sm font-medium whitespace-nowrap text-center"
+                          >
+                            {sub}
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            {/* Bottom Accent Line */}
+            <div className="h-px bg-gradient-to-r from-transparent via-brand-primary/40 to-transparent" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <AnimatePresence>
         {isOpen && (
           <motion.div 
@@ -119,10 +184,29 @@ const Navbar = () => {
             exit={{ opacity: 0, y: -20 }}
             className="md:hidden bg-white border-b border-slate-100 px-4 py-6 space-y-4"
           >
-            <a href="#" className="block text-slate-600 font-medium">양도신청</a>
-            <a href="#" className="block text-slate-600 font-medium">신청조회</a>
-            <a href="#" className="block text-slate-600 font-medium">검진기관</a>
-            <a href="#" className="block text-slate-600 font-medium">고객센터</a>
+            {navItems.map((item) => (
+              <div key={item.label} className="space-y-2">
+                <a 
+                  href={item.href} 
+                  onClick={() => setIsOpen(false)} 
+                  className="block text-slate-900 font-bold text-lg"
+                >
+                  {item.label}
+                </a>
+                <div className="pl-4 flex flex-col gap-2">
+                  {item.subItems.map((sub) => (
+                    <a 
+                      key={sub} 
+                      href={item.href} 
+                      onClick={() => setIsOpen(false)} 
+                      className="text-slate-500 text-sm font-medium"
+                    >
+                      {sub}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ))}
           </motion.div>
         )}
       </AnimatePresence>
@@ -272,6 +356,11 @@ const VisualSection = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 + index * 0.1 }}
               whileHover={{ y: -5 }}
+              onClick={() => {
+                if (item.label === '양도신청') {
+                  document.getElementById('reservation-form')?.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
               className="bg-white rounded-2xl p-6 shadow-xl shadow-slate-200/50 border border-slate-100 flex flex-col items-center text-center gap-4 group transition-all hover:border-brand-accent/30 hover:bg-brand-accent"
             >
               <div className="w-20 h-20 rounded-2xl bg-slate-50 flex items-center justify-center text-brand-accent group-hover:bg-white/20 group-hover:text-white transition-all duration-300">
@@ -300,7 +389,7 @@ const ReservationForm = () => {
   const institutions = ['삼성강북병원', '삼성창원병원', '서울대학교병원', '아산병원', '세브란스병원'];
 
   return (
-    <section className="py-24 bg-white">
+    <section id="reservation-form" className="py-24 bg-white">
       <div className="max-w-4xl mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-slate-900 mb-4">건강검진 양도 신청</h2>

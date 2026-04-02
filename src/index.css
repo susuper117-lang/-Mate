@@ -10,6 +10,9 @@
 }
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
   body {
     @apply bg-brand-bg text-slate-900 font-sans;
   }
