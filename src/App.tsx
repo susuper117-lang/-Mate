@@ -159,7 +159,7 @@ const Navbar = () => {
                           <a 
                             key={sub} 
                             href={item.href} 
-                            className="text-slate-300 hover:text-brand-primary transition-colors text-sm font-medium whitespace-nowrap text-center"
+                            className="text-white hover:text-brand-primary transition-colors text-sm font-medium whitespace-nowrap text-center"
                           >
                             {sub}
                           </a>
