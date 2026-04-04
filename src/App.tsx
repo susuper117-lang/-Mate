@@ -404,8 +404,20 @@ const ReservationForm = () => {
     const isPast = (year < 2026) || 
                    (year === 2026 && month < 3) || 
                    (year === 2026 && month === 3 && day < 4);
-    if (isPast || selectedSchedules.length >= 3) return;
+    if (isPast) return;
+
     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    
+    // Check if already selected
+    const existingIndex = selectedSchedules.findIndex(s => s.date === dateStr);
+    if (existingIndex !== -1) {
+      // Deselect
+      removeSchedule(existingIndex);
+      return;
+    }
+
+    if (selectedSchedules.length >= 3) return;
+    
     setShowTimePicker({ date: dateStr });
   };
 
@@ -453,7 +465,7 @@ const ReservationForm = () => {
           key={day}
           type="button"
           onClick={() => handleDateClick(day)}
-          disabled={isPast || isSelected || selectedSchedules.length >= 3}
+          disabled={isPast || (selectedSchedules.length >= 3 && !isSelected)}
           className={`h-12 w-full flex flex-col items-center justify-center rounded-xl transition-all relative
             ${isSelected ? 'bg-brand-primary text-white' : 'hover:bg-slate-100 text-slate-700'}
             ${isToday ? 'font-bold' : ''}
